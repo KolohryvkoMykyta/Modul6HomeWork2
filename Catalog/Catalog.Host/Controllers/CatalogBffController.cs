@@ -1,3 +1,4 @@
+using System.Data;
 using System.Net;
 using Catalog.Host.Data.Entities;
 using Catalog.Host.Models.Dtos;
@@ -29,6 +30,46 @@ public class CatalogBffController : ControllerBase
     public async Task<IActionResult> Items(PaginatedItemsRequest request)
     {
         var result = await _catalogService.GetCatalogItemsAsync(request.PageSize, request.PageIndex);
+        return Ok(result);
+    }
+
+    [HttpPost]
+    [ProducesResponseType(typeof(GetByResponse<CatalogItemDto>), (int)HttpStatusCode.OK)]
+    public async Task<IActionResult> GetById(GetByRequest<int> request)
+    {
+        var result = await _catalogService.GetItemById(request.Request);
+        return Ok(result);
+    }
+
+    [HttpPost]
+    [ProducesResponseType(typeof(GetByResponse<CatalogItemDto>), (int)HttpStatusCode.OK)]
+    public async Task<IActionResult> GetByBrand(GetByRequest<string> request)
+    {
+        var result = await _catalogService.GetItemByBrandAsync(request.Request);
+        return Ok(result);
+    }
+
+    [HttpPost]
+    [ProducesResponseType(typeof(GetByResponse<CatalogItemDto>), (int)HttpStatusCode.OK)]
+    public async Task<IActionResult> GetByType(GetByRequest<string> request)
+    {
+        var result = await _catalogService.GetItemByTypeAsync(request.Request);
+        return Ok(result);
+    }
+
+    [HttpPost]
+    [ProducesResponseType(typeof(GetByResponse<IEnumerable<CatalogItemDto>>), (int)HttpStatusCode.OK)]
+    public async Task<IActionResult> GetBrands(GetByRequest<string> request)
+    {
+        var result = await _catalogService.GetAllBrandAsync(request.Request);
+        return Ok(result);
+    }
+
+    [HttpPost]
+    [ProducesResponseType(typeof(GetByResponse<IEnumerable<CatalogItemDto>>), (int)HttpStatusCode.OK)]
+    public async Task<IActionResult> GetTypes(GetByRequest<string> request)
+    {
+        var result = await _catalogService.GetAllTypeAsync(request.Request);
         return Ok(result);
     }
 }
