@@ -40,7 +40,7 @@ public class CatalogService : BaseDataService<ApplicationDbContext>, ICatalogSer
         });
     }
 
-    public async Task<GetByResponse<CatalogItemDto>> GetItemById(int id)
+    public async Task<GetByResponse<CatalogItemDto>> GetItemByIdAsync(int id)
     {
         return await ExecuteSafeAsync(async () =>
         {

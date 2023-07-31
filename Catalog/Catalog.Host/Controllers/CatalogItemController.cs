@@ -26,7 +26,23 @@ public class CatalogItemController : ControllerBase
     [ProducesResponseType(typeof(AddItemResponse<int?>), (int)HttpStatusCode.OK)]
     public async Task<IActionResult> Add(CreateProductRequest request)
     {
-        var result = await _catalogItemService.Add(request.Name, request.Description, request.Price, request.AvailableStock, request.CatalogBrandId, request.CatalogTypeId, request.PictureFileName);
+        var result = await _catalogItemService.AddAsync(request.Name, request.Description, request.Price, request.AvailableStock, request.CatalogBrandId, request.CatalogTypeId, request.PictureFileName);
         return Ok(new AddItemResponse<int?>() { Id = result });
+    }
+
+    [HttpPost]
+    [ProducesResponseType(typeof(DeleteItemResponse), (int)HttpStatusCode.OK)]
+    public async Task<IActionResult> Delete(DeleteItemRequest request)
+    {
+        var result = await _catalogItemService.DeleteAsync(request.Id);
+        return Ok(new DeleteItemResponse() { IsSuccess = result });
+    }
+
+    [HttpPost]
+    [ProducesResponseType(typeof(UpdateItemResponse), (int)HttpStatusCode.OK)]
+    public async Task<IActionResult> Update(UpdateProductRequest request)
+    {
+        var result = await _catalogItemService.UpdateAsync(request.Id, request.Name, request.Description, request.Price, request.AvailableStock, request.CatalogBrandId, request.CatalogTypeId, request.PictureFileName);
+        return Ok(new UpdateItemResponse() { IsSuccess = result });
     }
 }

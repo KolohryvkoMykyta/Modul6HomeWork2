@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Catalog.Host.Data;
 using Catalog.Host.Data.Entities;
 using Catalog.Host.Repositories.Interfaces;
@@ -38,7 +35,7 @@ public class CatalogItemRepository : ICatalogItemRepository
         return new PaginatedItems<CatalogItem>() { TotalCount = totalItems, Data = itemsOnPage };
     }
 
-    public async Task<int?> Add(string name, string description, decimal price, int availableStock, int catalogBrandId, int catalogTypeId, string pictureFileName)
+    public async Task<int?> AddAsync(string name, string description, decimal price, int availableStock, int catalogBrandId, int catalogTypeId, string pictureFileName)
     {
         var item = await _dbContext.AddAsync(new CatalogItem
         {
@@ -47,12 +44,51 @@ public class CatalogItemRepository : ICatalogItemRepository
             Description = description,
             Name = name,
             PictureFileName = pictureFileName,
-            Price = price
+            Price = price,
+            AvailableStock = availableStock
         });
 
         await _dbContext.SaveChangesAsync();
 
         return item.Entity.Id;
+    }
+
+    public async Task<bool> DeleteAsync(int id)
+    {
+        var result = await _dbContext.CatalogItems.FindAsync(id);
+
+        if (result == null)
+        {
+            throw new InvalidOperationException("Incorrect id");
+        }
+
+        _dbContext.CatalogItems.Remove(result);
+        await _dbContext.SaveChangesAsync();
+
+        return true;
+    }
+
+    public async Task<bool> UpdateAsync(int id, string name, string description, decimal price, int availableStock, int catalogBrandId, int catalogTypeId, string pictureFileName)
+    {
+        var updatingItem = await _dbContext.CatalogItems.FindAsync(id);
+
+        if (updatingItem == null)
+        {
+            throw new InvalidOperationException("Incorrect id");
+        }
+
+        updatingItem.CatalogBrandId = catalogBrandId;
+        updatingItem.CatalogTypeId = catalogTypeId;
+        updatingItem.Description = description;
+        updatingItem.Name = name;
+        updatingItem.PictureFileName = pictureFileName;
+        updatingItem.Price = price;
+        updatingItem.AvailableStock = availableStock;
+
+        _dbContext.CatalogItems.Update(updatingItem);
+        await _dbContext.SaveChangesAsync();
+
+        return true;
     }
 
     public async Task<CatalogItem> GetItemByIdAsync(int id)
