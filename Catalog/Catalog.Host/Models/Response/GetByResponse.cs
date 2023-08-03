@@ -1,7 +1,9 @@
-﻿namespace Catalog.Host.Models.Response
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace Catalog.Host.Models.Response
 {
     public class GetByResponse<T>
     {
-        public T Response { get; set; } = default(T) !;
+        public T? Response { get; set; }
     }
 }

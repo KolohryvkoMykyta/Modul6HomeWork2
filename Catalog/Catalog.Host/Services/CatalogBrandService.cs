@@ -6,12 +6,12 @@ namespace Catalog.Host.Services
 {
     public class CatalogBrandService : BaseDataService<ApplicationDbContext>, ICatalogBrandService
     {
-        private readonly ICatalogTypeRepository _catalogBrandRepository;
+        private readonly ICatalogBrandRepository _catalogBrandRepository;
 
         public CatalogBrandService(
             IDbContextWrapper<ApplicationDbContext> dbContextWrapper,
             ILogger<BaseDataService<ApplicationDbContext>> logger,
-            ICatalogTypeRepository catalogBrandRepository)
+            ICatalogBrandRepository catalogBrandRepository)
             : base(dbContextWrapper, logger)
         {
             _catalogBrandRepository = catalogBrandRepository;
