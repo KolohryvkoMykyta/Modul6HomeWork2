@@ -1,11 +1,13 @@
+using System.Linq.Expressions;
 using AutoMapper;
-using Catalog.Host.Configurations;
 using Catalog.Host.Data;
 using Catalog.Host.Data.Entities;
+using Catalog.Host.Enums;
 using Catalog.Host.Models.Dtos;
 using Catalog.Host.Models.Response;
 using Catalog.Host.Repositories.Interfaces;
 using Catalog.Host.Services.Interfaces;
+using Catalog.Host.Extensions;
 
 namespace Catalog.Host.Services;
 
@@ -25,11 +27,29 @@ public class CatalogService : BaseDataService<ApplicationDbContext>, ICatalogSer
         _mapper = mapper;
     }
 
-    public async Task<PaginatedItemsResponse<CatalogItemDto>> GetCatalogItemsAsync(int pageSize, int pageIndex)
+    public async Task<PaginatedItemsResponse<CatalogItemDto>> GetCatalogItemsAsync(int pageSize, int pageIndex, Dictionary<CatalogTypeFilter, int>? filter)
     {
         return await ExecuteSafeAsync(async () =>
         {
-            var result = await _catalogItemRepository.GetByPageAsync(pageIndex, pageSize);
+            var filtersArray = filter?.ToArray();
+            Expression<Func<CatalogItem, bool>> filterExperssion = _ => true;
+
+            if (filtersArray is not null && filtersArray.Length > 0)
+            {
+                for (int i = 0; i < filtersArray.Length; i++)
+                {
+                    if (i == 0)
+                    {
+                        filterExperssion = GetQuery(filtersArray[0]);
+                    }
+                    else
+                    {
+                        filterExperssion = filterExperssion.And(GetQuery(filtersArray[i]));
+                    }
+                }
+            }
+
+            var result = await _catalogItemRepository.GetByPageAsync(pageIndex, pageSize, filterExperssion);
             return new PaginatedItemsResponse<CatalogItemDto>()
             {
                 Count = result.TotalCount,
@@ -106,6 +126,19 @@ public class CatalogService : BaseDataService<ApplicationDbContext>, ICatalogSer
 
             return new GetByResponse<IEnumerable<CatalogItemDto>> { Response = result };
         });
+    }
+
+    private Expression<Func<CatalogItem, bool>> GetQuery(KeyValuePair<CatalogTypeFilter, int> filter)
+    {
+        Expression<Func<CatalogItem, bool>> func = filter.Key switch
+        {
+
+            CatalogTypeFilter.Brand => item => item.CatalogBrandId == filter.Value,
+            CatalogTypeFilter.Type => item => item.CatalogTypeId == filter.Value,
+            _ => item => true
+        };
+
+        return func;
     }
 
     private CatalogItemDto ConverterCatalogItemToCatalogItemDto(CatalogItem item)

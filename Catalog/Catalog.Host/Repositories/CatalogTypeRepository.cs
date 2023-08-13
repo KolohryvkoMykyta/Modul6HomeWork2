@@ -60,5 +60,10 @@ namespace Catalog.Host.Repositories
 
             return true;
         }
+
+        public async Task<IEnumerable<CatalogType>> GetAllTypeAsync()
+        {
+            return await _dbContext.CatalogTypes.ToListAsync();
+        }
     }
 }

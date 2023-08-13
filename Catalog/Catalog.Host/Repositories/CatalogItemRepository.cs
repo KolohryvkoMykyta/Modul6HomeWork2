@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Catalog.Host.Data;
 using Catalog.Host.Data.Entities;
 using Catalog.Host.Repositories.Interfaces;
@@ -19,12 +20,19 @@ public class CatalogItemRepository : ICatalogItemRepository
         _logger = logger;
     }
 
-    public async Task<PaginatedItems<CatalogItem>> GetByPageAsync(int pageIndex, int pageSize)
+    public async Task<PaginatedItems<CatalogItem>> GetByPageAsync(int pageIndex, int pageSize, Expression<Func<CatalogItem, bool>>? filter = null)
     {
-        var totalItems = await _dbContext.CatalogItems
+        IQueryable<CatalogItem> query = _dbContext.CatalogItems;
+
+        if (filter != null)
+        {
+            query = query.Where(filter);
+        }
+
+        var totalItems = await query
             .LongCountAsync();
 
-        var itemsOnPage = await _dbContext.CatalogItems
+        var itemsOnPage = await query
             .Include(i => i.CatalogBrand)
             .Include(i => i.CatalogType)
             .OrderBy(c => c.Name)

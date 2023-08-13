@@ -1,6 +1,7 @@
 using System.Data;
 using System.Net;
 using Catalog.Host.Data.Entities;
+using Catalog.Host.Enums;
 using Catalog.Host.Models.Dtos;
 using Catalog.Host.Models.Requests;
 using Catalog.Host.Models.Response;
@@ -16,20 +17,26 @@ public class CatalogBffController : ControllerBase
 {
     private readonly ILogger<CatalogBffController> _logger;
     private readonly ICatalogService _catalogService;
+    private readonly ICatalogBrandService _brandService;
+    private readonly ICatalogTypeService _typeService;
 
     public CatalogBffController(
+        ICatalogTypeService catalogTypeService,
+        ICatalogBrandService brandService,
         ILogger<CatalogBffController> logger,
         ICatalogService catalogService)
     {
         _logger = logger;
         _catalogService = catalogService;
+        _brandService = brandService;
+        _typeService = catalogTypeService;
     }
 
     [HttpPost]
     [ProducesResponseType(typeof(PaginatedItemsResponse<CatalogItemDto>), (int)HttpStatusCode.OK)]
-    public async Task<IActionResult> Items(PaginatedItemsRequest request)
+    public async Task<IActionResult> Items(PaginatedItemsRequest<CatalogTypeFilter> request)
     {
-        var result = await _catalogService.GetCatalogItemsAsync(request.PageSize, request.PageIndex);
+        var result = await _catalogService.GetCatalogItemsAsync(request.PageSize, request.PageIndex, request.Filters);
         return Ok(result);
     }
 
@@ -57,19 +64,17 @@ public class CatalogBffController : ControllerBase
         return Ok(result);
     }
 
-    [HttpPost]
-    [ProducesResponseType(typeof(GetByResponse<IEnumerable<CatalogItemDto>>), (int)HttpStatusCode.OK)]
-    public async Task<IActionResult> GetBrands(GetByRequest<string> request)
+    [HttpGet]
+    public async Task<IActionResult> GetBrands()
     {
-        var result = await _catalogService.GetAllBrandAsync(request.Request);
+        var result = await _brandService.GetAllBrandsAsync();
         return Ok(result);
     }
 
-    [HttpPost]
-    [ProducesResponseType(typeof(GetByResponse<IEnumerable<CatalogItemDto>>), (int)HttpStatusCode.OK)]
-    public async Task<IActionResult> GetTypes(GetByRequest<string> request)
+    [HttpGet]
+    public async Task<IActionResult> GetTypes()
     {
-        var result = await _catalogService.GetAllTypeAsync(request.Request);
+        var result = await _typeService.GetAllTypeAsync();
         return Ok(result);
     }
 }
